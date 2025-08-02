@@ -33,13 +33,13 @@ git clone https://github.com/MuhammadSaim0604/Password-Manager-Backend.git
 cd Password-Manager-Backend
 ```
 
+
+
 ### Backend Setup
 ```bash
 cd Password-Manager-Backend
 npm install
-npm start
 ```
-
 Create a `.env` file inside the `Password-Manager-Backend` folder:
 
 ```
@@ -47,6 +47,14 @@ PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 ```
+
+Then run this command:
+
+```bash
+npm start
+```
+
+
 
 ### Frontend Setup
 
