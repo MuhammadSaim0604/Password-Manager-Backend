@@ -61,7 +61,7 @@ app.get('/api/auth/verify', authenticate, (req, res) => {
 
 
 // Routes
-router.post('/api/signup', async (req, res) => {
+app.post('/api/signup', async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -98,7 +98,7 @@ router.post('/api/signup', async (req, res) => {
   }
 });
 
-const login = async (req, res) => {
+app.use('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -132,7 +132,7 @@ const login = async (req, res) => {
     console.error('Login Error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
-};
+});
 
 
 // Protected Routes
