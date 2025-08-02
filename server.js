@@ -61,35 +61,79 @@ app.get('/api/auth/verify', authenticate, (req, res) => {
 
 
 // Routes
-app.post('/api/signup', async (req, res) => {
+router.post('/api/signup', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Basic validation
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ success: false, message: 'User already exists' });
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new user
     const user = new User({ email, password: hashedPassword });
     await user.save();
 
+    // Generate JWT
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ user: { id: user._id, email: user.email }, token });
+
+    res.status(201).json({
+      success: true,
+      message: 'Signup successful',
+      user: { id: user._id, email: user.email },
+      token
+    });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Signup Error:', err);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
-app.post('/api/login', async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
+    }
+
+    // Find user
     const user = await User.findOne({ email });
-    if (!user) throw new Error('Invalid credentials');
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
 
+    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new Error('Invalid credentials');
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
 
+    // Generate JWT
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ user: { id: user._id, email: user.email }, token });
+
+    res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      user: { id: user._id, email: user.email },
+      token
+    });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Login Error:', err);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
-});
+};
+
 
 // Protected Routes
 app.get('/api/passwords', authenticate, async (req, res) => {
