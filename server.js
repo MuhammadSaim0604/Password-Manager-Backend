@@ -238,6 +238,26 @@ app.get('/api/export-data', authenticate, async (req, res) => {
 });
 
 
+let pingScheduled = false;
+
+app.get('/ping', (req, res) => {
+  const targetUrl = 'https://port-forwarding-software.onrender.com/ping';
+
+  if (pingScheduled) {
+    return res.send('Ping already scheduled or sent.');
+  }
+
+  pingScheduled = true;
+
+  setTimeout(() => {
+    fetch(targetUrl, { method: 'GET' })
+      .then(response => console.log(`Pinged ${targetUrl} - status ${response.status}`))
+      .catch(err => console.log('Error pinging target:', err.message));
+  }, 30 * 1000);
+
+  res.send('Ping scheduled to run in 30 seconds.');
+});
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
